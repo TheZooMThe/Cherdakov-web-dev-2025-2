@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Заголовок поста</h1>
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8 col-md-10">
+            <!-- Мета-информация -->
+            <div class="d-flex align-items-center mb-3">
+                <span class="text-muted small me-3"> {{post.author}}</span>
+                <span class="text-muted small">{{ post.date.strftime('%d.%m.%Y') }}</span>
+            </div>
+
+            <!-- Изображение поста -->
+            <img src="{{ url_for('static', filename='images/' + post.image_id) }}"
+                class="img-fluid rounded-3 mb-4 shadow" alt="Изображение поста">
+
+            <!-- Текст поста -->
+            <div class="post-content mb-5">
+                <p class="text-secondary">
+                    {{ post.text}}
+                </p>
+            </div>
+
+            <!-- Форма комментария -->
+            <div class="card border-0 shadow-sm mb-5">
+                <div class="card-body">
+                    <h5 class="mb-4">Оставьте комментарий</h5>
+                    <form>
+                        <div class="mb-3">
+                            <textarea class="form-control" rows="4" placeholder="Напишите ваш комментарий..."
+                                style="resize: none"></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary px-4">
+                                Отправить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Комментарии -->
+            <div class="comments-section">
+                <h4 class="mb-4">Комментарии</h4>
+                {% for comment in post.comments %}
+                <!-- Основной комментарий -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <img src="{{ url_for('static', filename='images/' + avatar) }}" class="rounded-circle"
+                                    width="60" height="60" alt="Аватар">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="mt-0 mb-1">{{comment.author}}</h5>
+                                <p class="mb-0">{{ comment.text }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% if comment.replies %}
+                    <div class="card mb-4 border-0 shadow-sm ms-5">
+                        {% for reply in comment.replies %}
+                        <div class="card-body">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <img src="{{ url_for('static', filename='images/' + avatar) }}"
+                                        class="rounded-circle" width="60" height="60" alt="Аватар">
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="mt-0 mb-1">{{reply.author}}</h5>
+                                    <p class="mb-0">{{reply.text }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
