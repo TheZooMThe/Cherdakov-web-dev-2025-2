@@ -1,5 +1,0 @@
-n=int(input())
-x= input()
-A=x.split(' ')
-A.sort()
-print(A[-2])

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div>
+        <form id="phone-valid-form" method="post">
+            <legend id="legend-form">Проверка номера телефона</legend>
+            <div id="main_div_form">
+                <div class="input mb-3">
+                    <label for="input-phone" class="form-label">Номер телефона</label>
+                    <input 
+                        type="text" 
+                        class="form-control {% if error %}is-invalid{% endif %}" 
+                        id="input-phone" 
+                        name="phone" 
+                        value="{{ request.form.phone if request.form.phone else '' }}"
+                        required
+                    >
+                    {% if error %}
+                    <div class="invalid-feedback">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="buttons">
+                    <button class="btn btn-primary" id="submit-btn" type="submit">Отправить</button>
+                </div>
+                {% if fix_phone %}
+                <div>
+                    {{ fix_phone }}
+                </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
