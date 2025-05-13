@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4">Регистрация</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="login" class="form-label">Логин</label>
+                <input type="text" 
+                       class="form-control {% if 'login' in errors %}is-invalid{% endif %}" 
+                       id="login" 
+                       name="login" 
+                       value="{{ form_data.login if form_data }}">
+                {% if 'login' in errors %}
+                    <div class="invalid-feedback">{{ errors.login }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Пароль</label>
+                <input type="password" 
+                       class="form-control {% if 'password' in errors %}is-invalid{% endif %}" 
+                       id="password" 
+                       name="password">
+                {% if 'password' in errors %}
+                    <div class="invalid-feedback">{{ errors.password }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="confirm_password" class="form-label">Подтвердите пароль</label>
+                <input type="password" 
+                       class="form-control {% if 'confirm_password' in errors %}is-invalid{% endif %}" 
+                       id="confirm_password" 
+                       name="confirm_password">
+                {% if 'confirm_password' in errors %}
+                    <div class="invalid-feedback">{{ errors.confirm_password }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="last_name" class="form-label">Фамилия</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="last_name" 
+                       name="last_name"
+                       value="{{ form_data.last_name if form_data }}">
+            </div>
+
+            <div class="mb-3">
+                <label for="first_name" class="form-label">Имя *</label>
+                <input type="text" 
+                       class="form-control {% if 'first_name' in errors %}is-invalid{% endif %}" 
+                       id="first_name" 
+                       name="first_name"
+                       value="{{ form_data.first_name if form_data }}">
+                {% if 'first_name' in errors %}
+                    <div class="invalid-feedback">{{ errors.first_name }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="middle_name" class="form-label">Отчество</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="middle_name" 
+                       name="middle_name"
+                       value="{{ form_data.middle_name if form_data }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+            <a href="{{ url_for('login') }}" class="btn btn-link">Уже есть аккаунт? Войти</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
