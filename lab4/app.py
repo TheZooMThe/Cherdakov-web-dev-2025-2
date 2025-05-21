@@ -1,11 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from models import db, User, Role
-import re
-import click
 from flask.cli import with_appcontext
 from flask.cli import AppGroup
-from models import db, User, Role  
+from .models import db, User, Role  
 from functools import wraps
 
 
