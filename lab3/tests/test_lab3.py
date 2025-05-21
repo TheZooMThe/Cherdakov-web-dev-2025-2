@@ -1,20 +1,24 @@
 import pytest
 from app import app  
-
+from flask import url_for 
 
 app.config['TESTING'] = True
 app.config['WTF_CSRF_ENABLED'] = False 
 
 # Удобная функция для аутентификации тестового пользователя.
-def login(client, username='user', password='qwerty', remember_me=False, next_url=None):
+def login(client, username='user', password='qwerty', remember_me=False, next_url=None, follow_redirects=False):
     url = '/login'
     if next_url:
         url += f'?next={next_url}'
-    return client.post(url, data={
-        'username': username,
-        'password': password,
-        'remember_me': 'on' if remember_me else ''
-    }, follow_redirects=True)
+    return client.post(
+        url,
+        data={
+            'username': username,
+            'password': password,
+            'remember_me': 'on' if remember_me else ''
+        },
+        follow_redirects=follow_redirects  # Добавляем параметр follow_redirects
+    )
 
 @pytest.fixture
 def client():
@@ -31,8 +35,9 @@ def test_counter_increments(client):
 
 # 2. При успешной аутентификации происходит перенаправление на главную страницу и выводится сообщение.
 def test_successful_authentication_redirects_to_index(client):
-    response = login(client)
-    assert "Вы успешно аутентифицированы" in response.data.decode('utf-8')
+    response = login(client, follow_redirects=True)  # Следуем за редиректом
+    assert "Вы успешно аутентифицированы" in response.get_data(as_text=True)
+    assert response.request.path == url_for('index')  # Проверяем конечный URL
 
 # 3. При неудачной попытке аутентификации пользователь остаётся на той же странице и видит сообщение об ошибке.
 def test_failed_authentication_shows_error(client):
@@ -56,9 +61,10 @@ def test_unauthenticated_user_redirected_from_secret(client):
 
 # 6. После неудачной попытки доступа к секретной странице, при аутентификации с параметром next пользователь автоматически переходит на секретную страницу.
 def test_redirect_after_successful_login(client):
-    response = login(client, next_url='/secret')
+    response = login(client, next_url='/secret', follow_redirects=True)  # Следуем за редиректом
     assert "Вы успешно аутентифицированы" in response.get_data(as_text=True)
-    assert "Секретная страница" not in response.get_data(as_text=True)
+    assert "Секретная страница" in response.get_data(as_text=True)  # Теперь ожидаем контент секретной страницы
+    assert response.request.path == '/secret'  # Проверяем конечный URL
 
 
 # 7. Параметр "Запомнить меня" работает корректно (наличие remember_token с заданным сроком).

@@ -172,7 +172,6 @@ def edit_user(id):
     roles = Role.query.all() if current_user.role.name == 'Администратор' else []
     
     if request.method == 'POST':
-        # ... валидация данных
         if current_user.role.name != 'Администратор':
             # Запрет изменения роли для обычных пользователей
             request.form = request.form.copy()

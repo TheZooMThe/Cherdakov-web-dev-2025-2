@@ -31,27 +31,6 @@
                     <a class="nav-link" aria-current="page" href="{{ url_for('index') }}">Задание</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('posts') }}">Посты</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('about') }}">Об авторе</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('phone_valid') }}">Телефон</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('args') }}">Параметры url</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('headers') }}">Заголовки</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('cookies') }}">Печенье</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('form') }}">Форма</a>
-                  </li>
-                  <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('counter') }}">Счётчик</a>
                   </li>
                   {% if current_user.is_authenticated %}

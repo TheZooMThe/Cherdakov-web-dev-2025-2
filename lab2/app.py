@@ -47,18 +47,23 @@ def validate_phone(phone):
         else:
             return "Недопустимый ввод. В номере телефона встречаются недопустимые символы."
     
-    if len(digits) != 11:
-        return f"Недопустимый ввод. Неверное количество цифр. Найдено {len(digits)}, требуется 11."
+    if len(digits) != 11 and len(digits) != 10:
+        return f"Недопустимый ввод. Неверное количество цифр. Найдено {len(digits)}."
     
     return None
 
 def fix_phone_format(phone):
     clear_phone=[]
+    x=1
     for i in phone:
         if i.isdigit():
             clear_phone.append(i)
     phone_format="8-XXX-XXX-XX-XX"
-    for i in range(1,len(clear_phone)):
+    if len(clear_phone)==10:
+        x=0
+    else:
+        x=1
+    for i in range(x,len(clear_phone)):
         phone_format=phone_format.replace('X',clear_phone[i],1)
     return phone_format
         

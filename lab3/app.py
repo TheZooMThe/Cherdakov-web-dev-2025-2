@@ -178,7 +178,8 @@ def login():
                     user = User(user['id'], user['login'])
                     login_user(user, remember=remember_me)
                     flash('Вы успешно аутентифицированы', 'success')
-                    return redirect(url_for('index'))
+                    next_url = request.args.get('next') or url_for('index')
+                    return redirect(next_url)
             return render_template('auth.html', error='Пользователь не найден, проверьте корректность введённых данных.')
     return render_template('auth.html')
 

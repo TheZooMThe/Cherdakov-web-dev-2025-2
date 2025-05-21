@@ -5,7 +5,9 @@ import re
 import click
 from flask.cli import with_appcontext
 from flask.cli import AppGroup
-from models import db, User, Role
+from models import db, User, Role  
+from functools import wraps
+
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -149,13 +151,43 @@ def view_user(id):
 @login_required
 def edit_user(id):
     user = User.query.get_or_404(id)
-    # Обработка формы редактирования
-    return render_template('user_form.html', user=user, roles=Role.query.all())
+    if current_user.role.name != 'Администратор' and current_user.id != user.id:
+        flash('У вас недостаточно прав для редактирования этого пользователя.', 'danger')
+        return redirect(url_for('index'))
+    
+    roles = Role.query.all() if current_user.role.name == 'Администратор' else []
+    
+    if request.method == 'POST':
+        if current_user.role.name != 'Администратор':
+            # Запрет изменения роли для обычных пользователей
+            request.form = request.form.copy()
+            request.form['role_id'] = user.role_id
+        
+        # Обновление данных пользователя
+        user.login = request.form.get('login', user.login)
+        user.first_name = request.form.get('first_name', user.first_name)
+        user.last_name = request.form.get('last_name', user.last_name)
+        user.middle_name = request.form.get('middle_name', user.middle_name)
+        if current_user.role.name == 'Администратор':
+            user.role_id = request.form.get('role_id', user.role_id)
+        
+        db.session.commit()
+        flash('Данные пользователя обновлены', 'success')
+        return redirect(url_for('view_user', id=user.id))
+    
+    return render_template('user_form.html', user=user, roles=roles)
 
 @app.route('/user/<int:id>/delete', methods=['POST'])
-@login_required
 def delete_user(id):
-    # Удаление пользователя
+    user = User.query.get_or_404(id)
+    if current_user.role.name != 'Администратор' and current_user.id != user.id:
+        flash('У вас недостаточно прав для удаления этого пользователя.', 'danger')
+        return redirect(url_for('index'))
+    
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    flash('Пользователь успешно удалён', 'success')
     return redirect(url_for('index'))
 
 def validate_password(password):
@@ -364,4 +396,4 @@ def init_db():
 app.cli.add_command(db_cli)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run()
