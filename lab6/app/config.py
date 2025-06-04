@@ -1,6 +1,6 @@
 import os
 
-SECRET_KEY = 'secret-key'
+SECRET_KEY = '/RiXnoGXTLXVyfanm2XgKA=='
 
 SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:furry@localhost/lab6'
 

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, make_response
-from .models import VisitLog, User, db
+from models import VisitLog, User, db
 from sqlalchemy import func
 
 reports_bp = Blueprint('reports', __name__, url_prefix='/reports')

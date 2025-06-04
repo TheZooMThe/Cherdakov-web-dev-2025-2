@@ -53,3 +53,43 @@ class CourseRepository:
 
     def get_reviews_query(self, course_id):
         return self.db.session.query(Review).options(joinedload(Review.user)).filter(Review.course_id == course_id)
+    
+    def course_exists(self, course_id):
+        return self.db.session.query(Course.id).filter_by(id=course_id).scalar() is not None
+
+    def get_recent_reviews(self, course_id, limit=5):
+        return (
+            self.db.session.query(Review)
+            .options(joinedload(Review.user))
+            .filter(Review.course_id == course_id)
+            .order_by(Review.created_at.desc())
+            .limit(limit)
+            .all()
+        )
+
+    def get_user_review(self, course_id, user_id):
+        return (
+            self.db.session.query(Review)
+            .filter_by(course_id=course_id, user_id=user_id)
+            .first()
+        )
+
+    def has_user_reviewed(self, course_id, user_id):
+        return self.get_user_review(course_id, user_id) is not None
+
+    def create_review(self, course_id, user_id, rating, text):
+        course = self.get_course_by_id(course_id)
+        if not course:
+            return None
+
+        review = Review(
+            course_id=course_id,
+            user_id=user_id,
+            rating=rating,
+            text=text
+        )
+        self.db.session.add(review)
+        course.rating_sum += rating
+        course.rating_num += 1
+        self.db.session.commit()
+        return review

@@ -11,7 +11,7 @@ category_repository = CategoryRepository(db)
 image_repository = ImageRepository(db)
 
 
-bp = Blueprint('courses', __name__, url_prefix='/courses')
+bp = Blueprint('courses', __name__)
 
 COURSE_PARAMS = [
     'author_id', 'name', 'category_id', 'short_desc', 'full_desc'
@@ -81,27 +81,15 @@ from flask_login import current_user
 
 @bp.route('/<int:course_id>')
 def show_course(course_id):
-    course = db.session.query(Course).filter(Course.id == course_id).first()
+    course = course_repository.get_course_by_id(course_id)
     if course is None:
         abort(404)
 
-    recent_reviews = (
-        db.session.query(Review)
-        .options(joinedload(Review.user))
-        .filter(Review.course_id == course_id)
-        .order_by(Review.created_at.desc())
-        .limit(5)
-        .all()
-    )
+    recent_reviews = course_repository.get_recent_reviews(course_id)
 
-    # Есть ли отзыв от текущего пользователя?
     user_review = None
     if current_user.is_authenticated:
-        user_review = (
-            db.session.query(Review)
-            .filter(Review.course_id == course_id, Review.user_id == current_user.id)
-            .first()
-        )
+        user_review = course_repository.get_user_review(course_id, current_user.id)
 
     return render_template('courses/show.html',
                            course=course,
@@ -119,47 +107,26 @@ def create_review(course_id):
         flash('Текст отзыва не может быть пустым.', 'danger')
         return redirect(url_for('courses.show_course', course_id=course_id))
 
-    course = db.session.query(Course).filter_by(id=course_id).first()
-    if not course:
+    if not course_repository.course_exists(course_id):
         abort(404)
 
-    # Проверка: уже существует отзыв?
-    existing_review = (
-        db.session.query(Review)
-        .filter_by(course_id=course_id, user_id=current_user.id)
-        .first()
-    )
-    if existing_review:
+    if course_repository.has_user_reviewed(course_id, current_user.id):
         flash('Вы уже оставили отзыв на этот курс.', 'warning')
         return redirect(url_for('courses.show_course', course_id=course_id))
 
-    # Добавление отзыва
-    review = Review(
-        course_id=course_id,
-        user_id=current_user.id,
-        rating=rating,
-        text=text,
-    )
-    db.session.add(review)
-
-    # Обновление рейтинга курса
-    course.rating_sum += rating
-    course.rating_num += 1
-
-    db.session.commit()
+    course_repository.create_review(course_id, current_user.id, rating, text)
     flash('Отзыв успешно добавлен.', 'success')
     return redirect(url_for('courses.show_course', course_id=course_id))
 
-@bp.route('/<int:course_id>/reviews')
+@bp.route('/courses/<int:course_id>/reviews')
 def reviews(course_id):
     course = course_repository.get_course_by_id(course_id)
     if course is None:
         abort(404)
 
-    # Получаем параметры сортировки и страницу
-    sort_order = request.args.get('sort', 'new')  # new | positive | negative
+    sort_order = request.args.get('sort', 'new')
     page = request.args.get('page', 1, type=int)
-    per_page = 5  # отзывов на страницу
+    per_page = 5
 
     query = course_repository.get_reviews_query(course_id)
 
@@ -168,7 +135,7 @@ def reviews(course_id):
     elif sort_order == 'negative':
         query = query.order_by(Review.rating.asc(), Review.created_at.desc())
     else:
-        query = query.order_by(Review.created_at.desc())  # по новизне
+        query = query.order_by(Review.created_at.desc())
 
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     reviews = pagination.items
@@ -178,3 +145,4 @@ def reviews(course_id):
                            reviews=reviews,
                            pagination=pagination,
                            sort_order=sort_order)
+

@@ -107,7 +107,7 @@ class Image(db.Model):
     def url(self):
         return url_for('main.image', image_id=self.id)
 
-class Review(Base):
+class Review(db.Model):
     __tablename__ = 'reviews'
 
     id: Mapped[int] = mapped_column(primary_key=True)
