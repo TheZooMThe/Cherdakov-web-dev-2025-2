@@ -128,16 +128,12 @@ def reviews(course_id):
     page = request.args.get('page', 1, type=int)
     per_page = 5
 
-    query = course_repository.get_reviews_query(course_id)
-
-    if sort_order == 'positive':
-        query = query.order_by(Review.rating.desc(), Review.created_at.desc())
-    elif sort_order == 'negative':
-        query = query.order_by(Review.rating.asc(), Review.created_at.desc())
-    else:
-        query = query.order_by(Review.created_at.desc())
-
-    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    pagination = course_repository.get_paginated_reviews(
+        course_id, 
+        sort_order, 
+        page, 
+        per_page
+    )
     reviews = pagination.items
 
     return render_template('courses/reviews.html',
@@ -145,4 +141,3 @@ def reviews(course_id):
                            reviews=reviews,
                            pagination=pagination,
                            sort_order=sort_order)
-

@@ -93,3 +93,18 @@ class CourseRepository:
         course.rating_num += 1
         self.db.session.commit()
         return review
+    
+    def get_paginated_reviews(self, course_id, sort_order='new', page=1, per_page=5):
+        """Возвращает пагинированные отзывы с сортировкой"""
+        query = self.get_reviews_query(course_id)
+        query = self._apply_review_sorting(query, sort_order)
+        return query.paginate(page=page, per_page=per_page, error_out=False)
+
+    def _apply_review_sorting(self, query, sort_order):
+        """Применяет сортировку к запросу отзывов"""
+        if sort_order == 'positive':
+            return query.order_by(Review.rating.desc(), Review.created_at.desc())
+        elif sort_order == 'negative':
+            return query.order_by(Review.rating.asc(), Review.created_at.desc())
+        else:  
+            return query.order_by(Review.created_at.desc())

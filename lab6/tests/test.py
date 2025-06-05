@@ -164,42 +164,34 @@ def test_reviews_sorting(auth_client, user, course, app):
 
 def test_reviews_pagination_and_sorting(auth_client, user, course, app):
     with app.app_context():
-        # Создаем 12 отзывов с разным рейтингом и текстом
         reviews = []
         for i in range(12):
             r = Review(
                 course_id=course.id,
                 user_id=user.id,
-                rating=(i % 5) + 1,  # рейтинг 1..5
+                rating=(i % 5) + 1,  
                 text=f'Отзыв {i+1}'
             )
             reviews.append(r)
         db.session.add_all(reviews)
         db.session.commit()
 
-    # Запрос страницы 1 с сортировкой positive (рейтинг по убыванию)
     response = auth_client.get(f'/courses/{course.id}/reviews?sort=positive&page=1')
     assert response.status_code == 200
     html = response.data.decode('utf-8')
 
-    # Проверяем, что на странице ровно 5 отзывов (per_page=5)
     assert html.count('<li>') == 5
 
-    # Проверяем, что отзывы идут в правильном порядке по рейтингу (от 5 к 1)
-    # Проверим, что самый высокий рейтинг встречается среди первых отзывов
+
     assert 'рейтинг: 5' in html
 
-    # Запрос страницы 2 с той же сортировкой
     response2 = auth_client.get(f'/courses/{course.id}/reviews?sort=positive&page=2')
     assert response2.status_code == 200
     html2 = response2.data.decode('utf-8')
 
-    # Проверяем, что на странице тоже 5 отзывов
     assert html2.count('<li>') == 5
 
-    # Проверяем, что параметр sort=positive остался (например, в ссылках пагинации)
-    # Обычно ссылки пагинации содержат параметры запроса
+
     assert 'sort=positive' in html2
 
-    # Проверим, что отзывы на странице 2 отличаются от отзывов на странице 1 (например, другой текст)
     assert 'Отзыв 6' in html2 or 'Отзыв 7' in html2
